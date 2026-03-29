@@ -4,4 +4,5 @@ O sistema possui funcionalidades tanto para usuários quanto para administradore
 
 A estrutura do sistema inclui tela de login, dashboard principal com visão geral dos chamados, área de abertura de chamado, listagem com filtros por status e painel administrativo. A interface foi projetada com foco em organização, clareza visual e experiência do usuário, contando com menu lateral, indicadores visuais e sistema de filtros para facilitar a navegação.
 
-Projeto desenvolvido por Eduardo Gabriel, Thomas Andriel e Pedro Henrique 
+Projeto desenvolvido por Eduardo Gabriel, Thomas Andriel e Pedro Henrique Bernaski
+ 
