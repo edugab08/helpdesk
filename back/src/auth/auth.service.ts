@@ -35,4 +35,14 @@ export class AuthService {
   async validateUser(id: string) {
     return this.usersService.findOne(id);
   }
+
+  async validateToken(token: string) {
+    try {
+      const payload = this.jwtService.verify(token);
+      const user = await this.usersService.findOne(payload.sub);
+      return { valid: true, user };
+    } catch {
+      throw new UnauthorizedException('Token inválido ou expirado');
+    }
+  }
 }

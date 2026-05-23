@@ -1,46 +1,56 @@
-"use client"
+'use client';
 
-import { useState, useEffect } from "react"
-import { Toaster } from "sonner" 
-import Sidebar from "./components/ui/Sidebar"
-import PainelEstatisticas from "./components/ui/PainelEstatisticas"
-import { API_URL, Ticket } from "./lib/api"
+import { useState, useEffect } from 'react';
+import { Sidebar } from './components/ui/Sidebar';
+import PainelEstatisticas from './components/ui/PainelEstatisticas';
+import { ticketsApi, Ticket, TicketStatus } from './lib/api';
+import { useAuth } from './contexts/AuthContext';
+import { toast } from 'sonner';
+import { Loader2 } from 'lucide-react';
 
 export default function Home() {
-  const [tickets, setTickets] = useState<Ticket[]>([])
-  const [carregando, setCarregando] = useState(true)
-  const [filtroStatus, setFiltroStatus] = useState<"aberto" | "fechado">("aberto")
+  const { user, logout, carregando: authCarregando } = useAuth();
+  const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [carregando, setCarregando] = useState(true);
+  const [filtroStatus, setFiltroStatus] = useState<TicketStatus | 'TODOS'>('ABERTO');
 
   useEffect(() => {
-    async function carregarTickets() {
-      try {
-        const resposta = await fetch(API_URL)
-        const dados = await resposta.json()
-        
-        if (Array.isArray(dados)) {
-          setTickets(dados)
-        }
-      } catch (error) {
-        console.error("Erro ao carregar a Dashboard:", error)
-      } finally {
-        setCarregando(false)
-      }
+    if (authCarregando) return;
+    carregarTickets();
+  }, [authCarregando, filtroStatus]);
+
+  async function carregarTickets() {
+    try {
+      setCarregando(true);
+      const filtros = filtroStatus !== 'TODOS' ? { status: filtroStatus } : {};
+      const dados = await ticketsApi.listar(filtros);
+      setTickets(dados);
+    } catch (err: any) {
+      toast.error('Erro ao carregar chamados: ' + (err.message || 'Tente novamente.'));
+    } finally {
+      setCarregando(false);
     }
-    carregarTickets()
-  }, [])
+  }
+
+  if (authCarregando) {
+    return (
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+        <Loader2 size={32} className="text-blue-500 animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-screen bg-slate-900 overflow-hidden font-sans">
-      <Toaster theme="dark" position="top-right" richColors closeButton />
-
-      <Sidebar 
-        tickets={tickets} 
-        carregando={carregando} 
-        filtroStatus={filtroStatus} 
-        setFiltroStatus={setFiltroStatus} 
+      <Sidebar
+        tickets={tickets}
+        carregando={carregando}
+        filtroStatus={filtroStatus}
+        setFiltroStatus={setFiltroStatus}
+        user={user}
+        onLogout={logout}
       />
-
       <PainelEstatisticas tickets={tickets} />
     </div>
-  )
+  );
 }
